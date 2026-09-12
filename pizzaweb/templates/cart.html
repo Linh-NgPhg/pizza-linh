@@ -1,0 +1,1350 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Giỏ hàng - Pizza House
+{% endblock %}
+
+{% block content %}
+
+<style>
+
+    /* =========================================
+       CART PAGE
+    ========================================= */
+
+    .cart-page {
+        padding: 60px 0 80px;
+    }
+
+    .cart-container {
+        max-width: 1000px;
+        margin: auto;
+    }
+
+    .cart-title {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .cart-title h2 {
+        font-size: 32px;
+        margin-bottom: 8px;
+    }
+
+    .cart-title p {
+        color: #777;
+    }
+
+
+    /* =========================================
+       CART ITEM
+    ========================================= */
+
+    .cart-item {
+        background: white;
+        border-radius: 18px;
+        padding: 20px;
+        margin-bottom: 16px;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        box-shadow: 0 5px 20px rgba(0,0,0,0.06);
+
+        transition: 0.2s;
+    }
+
+    .cart-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.09);
+    }
+
+
+    .cart-item-left {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+    }
+
+
+    /* =========================================
+       PRODUCT IMAGE
+    ========================================= */
+
+    .cart-image {
+        width: 90px;
+        height: 90px;
+
+        border-radius: 14px;
+
+        object-fit: cover;
+
+        background: #f5f5f5;
+    }
+
+
+    .cart-info h3 {
+        margin: 0 0 8px;
+
+        font-size: 19px;
+    }
+
+    .cart-info p {
+        margin: 4px 0;
+
+        color: #777;
+
+        font-size: 14px;
+    }
+
+
+    .cart-price {
+        font-size: 18px;
+
+        font-weight: 700;
+
+        color: #e74c3c;
+
+        margin-top: 5px;
+    }
+
+
+    /* =========================================
+       REMOVE BUTTON
+    ========================================= */
+
+    .remove-btn {
+        display: inline-flex;
+
+        align-items: center;
+        gap: 6px;
+
+        padding: 9px 15px;
+
+        border-radius: 9px;
+
+        background: #fff1f0;
+
+        color: #e74c3c;
+
+        text-decoration: none;
+
+        font-size: 14px;
+
+        font-weight: 600;
+
+        transition: 0.2s;
+    }
+
+    .remove-btn:hover {
+        background: #e74c3c;
+
+        color: white;
+    }
+
+
+    /* =========================================
+       TOTAL BOX
+    ========================================= */
+
+    .cart-total-box {
+        margin-top: 30px;
+
+        background: white;
+
+        border-radius: 18px;
+
+        padding: 25px 30px;
+
+        box-shadow: 0 5px 20px rgba(0,0,0,0.06);
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: space-between;
+    }
+
+
+    .total-label {
+        font-size: 18px;
+
+        color: #555;
+    }
+
+
+    .total-price {
+        font-size: 28px;
+
+        font-weight: 800;
+
+        color: #e74c3c;
+    }
+
+
+    /* =========================================
+       PAYMENT BUTTON
+    ========================================= */
+
+    .payment-btn {
+        margin-top: 20px;
+
+        width: 100%;
+
+        border: none;
+
+        padding: 15px 25px;
+
+        border-radius: 12px;
+
+        background: #e74c3c;
+
+        color: white;
+
+        font-family: inherit;
+
+        font-size: 17px;
+
+        font-weight: 700;
+
+        cursor: pointer;
+
+        transition: 0.2s;
+    }
+
+    .payment-btn:hover {
+        background: #c0392b;
+
+        transform: translateY(-2px);
+    }
+
+
+    /* =========================================
+       EMPTY CART
+    ========================================= */
+
+    .empty-cart {
+        background: white;
+
+        border-radius: 20px;
+
+        padding: 70px 30px;
+
+        text-align: center;
+
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    }
+
+    .empty-cart-icon {
+        font-size: 60px;
+
+        margin-bottom: 20px;
+    }
+
+    .empty-cart h2 {
+        margin-bottom: 10px;
+    }
+
+    .empty-cart p {
+        color: #777;
+
+        margin-bottom: 25px;
+    }
+
+
+    .home-btn {
+        display: inline-block;
+
+        padding: 12px 25px;
+
+        background: #e74c3c;
+
+        color: white;
+
+        border-radius: 10px;
+
+        text-decoration: none;
+
+        font-weight: 600;
+    }
+
+
+    /* =========================================
+       PAYMENT OVERLAY
+    ========================================= */
+
+    .payment-overlay {
+        position: fixed;
+
+        inset: 0;
+
+        background: rgba(0,0,0,0.65);
+
+        display: none;
+
+        align-items: center;
+
+        justify-content: center;
+
+        z-index: 9999;
+
+        padding: 20px;
+    }
+
+
+    .payment-overlay.show {
+        display: flex;
+    }
+
+
+    /* =========================================
+       PAYMENT POPUP
+    ========================================= */
+
+    .payment-popup {
+        width: 100%;
+
+        max-width: 430px;
+
+        background: white;
+
+        border-radius: 22px;
+
+        padding: 28px;
+
+        text-align: center;
+
+        position: relative;
+
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+
+        animation: popupShow 0.25s ease;
+    }
+
+
+    @keyframes popupShow {
+
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+    }
+
+
+    .payment-popup h2 {
+        margin: 0 0 8px;
+
+        font-size: 25px;
+    }
+
+
+    .payment-subtitle {
+        color: #777;
+
+        font-size: 14px;
+
+        margin-bottom: 20px;
+    }
+
+
+    /* =========================================
+       CLOSE BUTTON
+    ========================================= */
+
+    .payment-close {
+        position: absolute;
+
+        top: 14px;
+
+        right: 16px;
+
+        width: 35px;
+
+        height: 35px;
+
+        border: none;
+
+        border-radius: 50%;
+
+        background: #f3f3f3;
+
+        color: #555;
+
+        font-size: 18px;
+
+        cursor: pointer;
+
+        transition: 0.2s;
+    }
+
+    .payment-close:hover {
+        background: #e74c3c;
+
+        color: white;
+    }
+
+
+    /* =========================================
+       QR CODE
+    ========================================= */
+
+    .qr-wrapper {
+        width: 230px;
+
+        height: 230px;
+
+        margin: 15px auto;
+
+        padding: 10px;
+
+        border-radius: 15px;
+
+        background: white;
+
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+
+        transition: 0.3s;
+    }
+
+
+    .qr-wrapper img {
+        width: 100%;
+
+        height: 100%;
+
+        object-fit: contain;
+
+        border-radius: 8px;
+    }
+
+
+    /* QR hết hạn */
+
+    .qr-wrapper.expired {
+        opacity: 0.3;
+
+        filter: grayscale(1);
+    }
+
+
+    /* =========================================
+       COUNTDOWN
+    ========================================= */
+
+    .countdown-label {
+        font-size: 13px;
+
+        color: #777;
+
+        margin-top: 12px;
+    }
+
+
+    .countdown {
+        font-size: 30px;
+
+        font-weight: 800;
+
+        color: #e74c3c;
+
+        margin: 3px 0 10px;
+
+        letter-spacing: 2px;
+    }
+
+
+    /* =========================================
+       PAYMENT TOTAL
+    ========================================= */
+
+    .payment-total {
+        background: #fff6f5;
+
+        border-radius: 12px;
+
+        padding: 12px;
+
+        margin: 15px 0;
+
+        font-size: 17px;
+
+        font-weight: 700;
+
+        color: #e74c3c;
+    }
+
+
+    /* =========================================
+       NOTE
+    ========================================= */
+
+    .payment-note {
+        font-size: 13px;
+
+        color: #777;
+
+        line-height: 1.5;
+
+        margin: 12px 0;
+    }
+
+
+    /* =========================================
+       PAYMENT ACTION BUTTONS
+    ========================================= */
+
+    .payment-actions {
+        display: flex;
+
+        gap: 12px;
+
+        margin-top: 20px;
+    }
+
+
+    .payment-success-btn,
+    .payment-cancel-btn {
+        flex: 1;
+
+        border: none;
+
+        padding: 13px 15px;
+
+        border-radius: 10px;
+
+        font-family: inherit;
+
+        font-size: 15px;
+
+        font-weight: 700;
+
+        cursor: pointer;
+
+        transition: 0.2s;
+    }
+
+
+    .payment-success-btn {
+        background: #27ae60;
+
+        color: white;
+    }
+
+    .payment-success-btn:hover {
+        background: #219150;
+
+        transform: translateY(-1px);
+    }
+
+
+    .payment-cancel-btn {
+        background: #eeeeee;
+
+        color: #555;
+    }
+
+    .payment-cancel-btn:hover {
+        background: #dddddd;
+
+        transform: translateY(-1px);
+    }
+
+
+    /* =========================================
+       EXPIRED MESSAGE
+    ========================================= */
+
+    .expired-message {
+        display: none;
+
+        margin: 15px 0;
+
+        padding: 13px;
+
+        background: #fff1f0;
+
+        color: #e74c3c;
+
+        border-radius: 10px;
+
+        font-weight: 600;
+    }
+
+
+    .expired-message.show {
+        display: block;
+    }
+
+
+    /* =========================================
+       PAYMENT AGAIN
+    ========================================= */
+
+    .payment-again-btn {
+        display: none;
+
+        width: 100%;
+
+        border: none;
+
+        padding: 13px;
+
+        margin-top: 12px;
+
+        border-radius: 10px;
+
+        background: #e74c3c;
+
+        color: white;
+
+        font-family: inherit;
+
+        font-size: 15px;
+
+        font-weight: 700;
+
+        cursor: pointer;
+    }
+
+
+    .payment-again-btn.show {
+        display: block;
+    }
+
+
+    /* =========================================
+       RESPONSIVE
+    ========================================= */
+
+    @media (max-width: 650px) {
+
+        .cart-page {
+            padding: 40px 15px 60px;
+        }
+
+
+        .cart-title h2 {
+            font-size: 27px;
+        }
+
+
+        .cart-item {
+            padding: 15px;
+        }
+
+
+        .cart-item-left {
+            gap: 12px;
+        }
+
+
+        .cart-image {
+            width: 70px;
+
+            height: 70px;
+        }
+
+
+        .cart-info h3 {
+            font-size: 16px;
+        }
+
+
+        .cart-price {
+            font-size: 16px;
+        }
+
+
+        .remove-btn {
+            padding: 7px 10px;
+
+            font-size: 12px;
+        }
+
+
+        .cart-total-box {
+            padding: 20px;
+
+            flex-direction: column;
+
+            align-items: stretch;
+
+            gap: 8px;
+        }
+
+
+        .total-price {
+            font-size: 25px;
+        }
+
+
+        .payment-popup {
+            padding: 24px 18px;
+        }
+
+
+        .qr-wrapper {
+            width: 200px;
+
+            height: 200px;
+        }
+
+    }
+
+</style>
+
+
+<section class="cart-page">
+
+    <div class="cart-container">
+
+
+        <!-- =====================================
+             TITLE
+        ====================================== -->
+
+        <div class="cart-title">
+
+            <h2>
+                🛒 Giỏ hàng
+            </h2>
+
+            <p>
+                Kiểm tra các món bạn đã chọn
+            </p>
+
+        </div>
+
+
+        {% if cart_items %}
+
+
+            <!-- =================================
+                 CART ITEMS
+            ================================== -->
+
+            {% for item in cart_items %}
+
+                <div class="cart-item">
+
+
+                    <div class="cart-item-left">
+
+
+                        <!-- PRODUCT IMAGE -->
+
+                        {% if item.pizza.image %}
+
+                            <img
+                                class="cart-image"
+                                src="{{ item.pizza.image.url }}"
+                                alt="{{ item.pizza.name }}"
+                            >
+
+                        {% else %}
+
+                            <div
+                                class="cart-image"
+                                style="
+                                    display:flex;
+                                    align-items:center;
+                                    justify-content:center;
+                                    font-size:35px;
+                                "
+                            >
+                                🍕
+                            </div>
+
+                        {% endif %}
+
+
+                        <!-- PRODUCT INFO -->
+
+                        <div class="cart-info">
+
+                            <h3>
+                                {{ item.pizza.name }}
+                            </h3>
+
+                            <p>
+                                Số lượng:
+                                <strong>{{ item.quantity }}</strong>
+                            </p>
+
+                            <div class="cart-price">
+
+                                {{ item.item_total|floatformat:0 }}đ
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <!-- REMOVE -->
+
+                    <a
+                        href="{% url 'remove_from_cart' item.pizza.id %}"
+                        class="remove-btn"
+                    >
+
+                        <i class="fa-solid fa-trash"></i>
+
+                        Xóa
+
+                    </a>
+
+
+                </div>
+
+            {% endfor %}
+
+
+            <!-- =================================
+                 TOTAL
+            ================================== -->
+
+            <div class="cart-total-box">
+
+                <div class="total-label">
+
+                    Tổng thanh toán
+
+                </div>
+
+                <div class="total-price">
+
+                    {{ total|floatformat:0 }}đ
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================
+                 PAYMENT BUTTON
+            ================================== -->
+
+            <button
+                type="button"
+                class="payment-btn"
+                onclick="openPayment()"
+            >
+
+                <i class="fa-solid fa-credit-card"></i>
+
+                Thanh toán
+
+            </button>
+
+
+        {% else %}
+
+
+            <!-- =================================
+                 EMPTY CART
+            ================================== -->
+
+            <div class="empty-cart">
+
+                <div class="empty-cart-icon">
+                    🍕
+                </div>
+
+                <h2>
+                    Giỏ hàng đang trống
+                </h2>
+
+                <p>
+                    Hãy chọn một chiếc pizza thật ngon nhé!
+                </p>
+
+                <a
+                    href="{% url 'home' %}"
+                    class="home-btn"
+                >
+
+                    <i class="fa-solid fa-pizza-slice"></i>
+
+                    Xem menu
+
+                </a>
+
+            </div>
+
+        {% endif %}
+
+
+    </div>
+
+</section>
+
+
+
+<!-- =================================================
+     PAYMENT POPUP
+================================================== -->
+
+<div
+    id="paymentOverlay"
+    class="payment-overlay"
+>
+
+
+    <div class="payment-popup">
+
+
+        <!-- CLOSE -->
+
+        <button
+            type="button"
+            class="payment-close"
+            onclick="closePayment()"
+        >
+
+            <i class="fa-solid fa-xmark"></i>
+
+        </button>
+
+
+        <!-- TITLE -->
+
+        <h2>
+            💳 Thanh toán
+        </h2>
+
+        <p class="payment-subtitle">
+            Quét mã QR để chuyển khoản
+        </p>
+
+
+        <!-- TOTAL -->
+
+        <div class="payment-total">
+
+            Tổng tiền:
+            {{ total|floatformat:0 }}đ
+
+        </div>
+
+
+        <!-- COUNTDOWN -->
+
+        <div class="countdown-label">
+
+            Mã thanh toán có hiệu lực trong
+
+        </div>
+
+
+        <div
+            id="countdown"
+            class="countdown"
+        >
+            02:00
+        </div>
+
+
+        <!-- QR -->
+
+        <div
+            id="qrWrapper"
+            class="qr-wrapper"
+        >
+
+            <img
+                src="{% static 'images/qr-payment.png' %}"
+                alt="Mã QR thanh toán"
+            >
+
+        </div>
+
+
+        <!-- NOTE -->
+
+        <p class="payment-note">
+
+            Vui lòng kiểm tra đúng số tiền trước khi chuyển khoản.
+            Sau khi chuyển khoản xong, hãy bấm
+            <strong>Thành công</strong>.
+
+        </p>
+
+
+        <!-- EXPIRED -->
+
+        <div
+            id="expiredMessage"
+            class="expired-message"
+        >
+
+            ⏰ Mã thanh toán đã hết hạn.
+
+        </div>
+
+
+        <!-- =========================================
+             ACTION BUTTONS
+        ========================================== -->
+
+        <div class="payment-actions">
+
+
+            <!-- SUCCESS -->
+
+            <button
+                type="button"
+                class="payment-success-btn"
+                id="successButton"
+                onclick="paymentSuccess()"
+            >
+
+                <i class="fa-solid fa-check"></i>
+
+                Thành công
+
+            </button>
+
+
+            <!-- CANCEL -->
+
+            <button
+                type="button"
+                class="payment-cancel-btn"
+                id="cancelButton"
+                onclick="paymentCancel()"
+            >
+
+                <i class="fa-solid fa-xmark"></i>
+
+                Hủy
+
+            </button>
+
+
+        </div>
+
+
+        <!-- PAYMENT AGAIN -->
+
+        <button
+            type="button"
+            class="payment-again-btn"
+            id="paymentAgainButton"
+            onclick="restartPayment()"
+        >
+
+            <i class="fa-solid fa-rotate-right"></i>
+
+            Thanh toán lại
+
+        </button>
+
+
+    </div>
+
+</div>
+
+
+
+<script>
+
+    /* =========================================
+       PAYMENT VARIABLES
+    ========================================= */
+
+    const PAYMENT_TIME = 2 * 60;
+
+    let remainingTime = PAYMENT_TIME;
+
+    let countdownInterval = null;
+
+
+    /* =========================================
+       OPEN PAYMENT
+    ========================================= */
+
+    function openPayment() {
+
+        const overlay =
+            document.getElementById("paymentOverlay");
+
+        overlay.classList.add("show");
+
+        restartPayment();
+
+    }
+
+
+    /* =========================================
+       CLOSE PAYMENT
+    ========================================= */
+
+    function closePayment() {
+
+        const overlay =
+            document.getElementById("paymentOverlay");
+
+        overlay.classList.remove("show");
+
+        clearInterval(countdownInterval);
+
+    }
+
+
+    /* =========================================
+       FORMAT TIME
+    ========================================= */
+
+    function formatTime(seconds) {
+
+        const minutes =
+            Math.floor(seconds / 60);
+
+        const secs =
+            seconds % 60;
+
+
+        return (
+            String(minutes).padStart(2, "0")
+            + ":"
+            +
+            String(secs).padStart(2, "0")
+        );
+
+    }
+
+
+    /* =========================================
+       START COUNTDOWN
+    ========================================= */
+
+    function startCountdown() {
+
+        clearInterval(countdownInterval);
+
+
+        remainingTime = PAYMENT_TIME;
+
+
+        const countdown =
+            document.getElementById("countdown");
+
+
+        countdown.textContent =
+            formatTime(remainingTime);
+
+
+        countdownInterval = setInterval(function () {
+
+            remainingTime--;
+
+
+            countdown.textContent =
+                formatTime(remainingTime);
+
+
+            if (remainingTime <= 0) {
+
+                clearInterval(countdownInterval);
+
+                expirePayment();
+
+            }
+
+        }, 1000);
+
+    }
+
+
+    /* =========================================
+       PAYMENT EXPIRED
+    ========================================= */
+
+    function expirePayment() {
+
+        const qrWrapper =
+            document.getElementById("qrWrapper");
+
+        const expiredMessage =
+            document.getElementById("expiredMessage");
+
+        const successButton =
+            document.getElementById("successButton");
+
+        const cancelButton =
+            document.getElementById("cancelButton");
+
+        const paymentAgainButton =
+            document.getElementById("paymentAgainButton");
+
+
+        /* Làm mờ QR */
+
+        qrWrapper.classList.add("expired");
+
+
+        /* Hiện thông báo */
+
+        expiredMessage.classList.add("show");
+
+
+        /* Ẩn nút Thành công */
+
+        successButton.style.display = "none";
+
+
+        /* Vẫn cho phép Hủy */
+
+        cancelButton.style.display = "block";
+
+
+        /* Hiện nút thanh toán lại */
+
+        paymentAgainButton.classList.add("show");
+
+    }
+
+
+    /* =========================================
+       RESTART PAYMENT
+    ========================================= */
+
+    function restartPayment() {
+
+        const qrWrapper =
+            document.getElementById("qrWrapper");
+
+        const expiredMessage =
+            document.getElementById("expiredMessage");
+
+        const successButton =
+            document.getElementById("successButton");
+
+        const cancelButton =
+            document.getElementById("cancelButton");
+
+        const paymentAgainButton =
+            document.getElementById("paymentAgainButton");
+
+
+        /* QR hoạt động lại */
+
+        qrWrapper.classList.remove("expired");
+
+
+        /* Ẩn thông báo hết hạn */
+
+        expiredMessage.classList.remove("show");
+
+
+        /* Hiện lại nút */
+
+        successButton.style.display = "block";
+
+        cancelButton.style.display = "block";
+
+
+        /* Ẩn nút thanh toán lại */
+
+        paymentAgainButton.classList.remove("show");
+
+
+        /* Chạy lại 2 phút */
+
+        startCountdown();
+
+    }
+
+
+    /* =========================================
+       PAYMENT SUCCESS
+    ========================================= */
+
+    function paymentSuccess() {
+
+        /*
+         * Đóng popup trước
+         */
+
+        closePayment();
+
+
+        /*
+         * Sau 300ms chuyển tới Django.
+         *
+         * Django sẽ xóa giỏ hàng
+         * rồi redirect về trang chủ.
+         */
+
+        setTimeout(function () {
+
+            window.location.href =
+                "{% url 'payment_success' %}";
+
+        }, 300);
+
+    }
+
+
+    /* =========================================
+       PAYMENT CANCEL
+    ========================================= */
+
+    function paymentCancel() {
+
+        /*
+         * Đóng popup
+         */
+
+        closePayment();
+
+
+        /*
+         * Giữ nguyên giỏ hàng
+         * và quay lại trang cart.
+         */
+
+        setTimeout(function () {
+
+            window.location.href =
+                "{% url 'payment_cancel' %}";
+
+        }, 300);
+
+    }
+
+
+    /* =========================================
+       CLICK OUTSIDE POPUP
+    ========================================= */
+
+    document
+        .getElementById("paymentOverlay")
+        .addEventListener("click", function(event) {
+
+            if (
+                event.target === this
+            ) {
+
+                closePayment();
+
+            }
+
+        });
+
+
+</script>
+
+
+{% endblock %}

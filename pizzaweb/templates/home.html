@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Pizza House - Pizza ngon mỗi ngày
+{% endblock %}
+
+{% block content %}
+
+<main>
+
+    <!-- ================================
+         HERO
+    ================================= -->
+
+    <section class="container">
+
+        <div class="hero">
+
+            <!-- HERO TEXT -->
+
+            <div class="hero-text">
+
+                <h1>
+                    Pizza ngon
+                    <span>mỗi ngày</span>
+                </h1>
+
+                <p>
+                    Pizza nóng hổi, phô mai béo ngậy,
+                    nguyên liệu tươi ngon và giao hàng
+                    tận nơi.
+                </p>
+
+                <a href="#menu" class="hero-btn">
+                    🍕 Đặt pizza ngay
+                </a>
+
+            </div>
+
+
+            <!-- HERO IMAGE
+                 Ảnh này là ảnh riêng,
+                 KHÔNG lấy từ Database
+            -->
+
+            <div class="hero-image-container">
+
+                <img
+                    class="hero-image"
+                    src="{% static 'images/hero-pizza.png' %}"
+                    alt="Pizza House"
+                >
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================================
+         MENU PIZZA
+    ================================= -->
+
+    <section
+        class="section container"
+        id="menu"
+    >
+
+        <!-- TIÊU ĐỀ -->
+
+        <div class="section-title">
+
+            <h2>
+                🍕 Menu Pizza
+            </h2>
+
+            <p>
+                Chọn món pizza yêu thích của bạn
+            </p>
+
+        </div>
+
+
+        <!-- DANH SÁCH PIZZA -->
+
+        <div class="products">
+
+            {% for pizza in pizzas %}
+
+                <div class="product-card">
+
+
+                    <!-- ================================
+                         ẢNH PIZZA
+                         LẤY TỪ DATABASE / ADMIN
+                    ================================= -->
+
+                    {% if pizza.image %}
+
+                        <img
+                            class="product-image"
+                            src="{{ pizza.image.url }}"
+                            alt="{{ pizza.name }}"
+                        >
+
+                    {% else %}
+
+                        <!-- Nếu pizza chưa có ảnh -->
+
+                        <div class="product-image no-image">
+                            🍕
+                        </div>
+
+                    {% endif %}
+
+
+                    <!-- ================================
+                         THÔNG TIN PIZZA
+                    ================================= -->
+
+                    <div class="product-info">
+
+                        <h3>
+                            {{ pizza.name }}
+                        </h3>
+
+
+                        <p>
+                            {{ pizza.description }}
+                        </p>
+
+
+                        <!-- ================================
+                             GIÁ + THÊM GIỎ
+                        ================================= -->
+
+                        <div class="product-bottom">
+
+                            <span class="price">
+                                {{ pizza.price|floatformat:0 }}đ
+                            </span>
+
+
+                            <a
+                                href="{% url 'add_to_cart' pizza.id %}"
+                                class="add-btn"
+                            >
+                                + Thêm giỏ
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+            {% empty %}
+
+                <!-- ================================
+                     KHÔNG CÓ PIZZA
+                ================================= -->
+
+                <p>
+                    Hiện chưa có pizza.
+                    Hãy vào Admin để thêm món.
+                </p>
+
+            {% endfor %}
+
+        </div>
+
+    </section>
+
+</main>
+
+{% endblock %}
